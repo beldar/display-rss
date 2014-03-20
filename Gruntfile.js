@@ -208,7 +208,10 @@ module.exports = function (grunt) {
                         '.htaccess',
                         'elements/**',
                         'lib-elements/**',
-                        'images/{,*/}*.{webp,gif}'
+                        'images/{,*/}*.{webp,gif}',
+                        'bower_components/platform/platform.js',
+                        'bower_components/polymer/*',
+                        'bower_components/polymer-jsonp/*'
                     ]
                 }]
             }
