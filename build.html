@@ -1,0 +1,252 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>display-rss</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+        <link rel="stylesheet" href="styles/main.css">
+
+        <!-- Place your HTML imports here -->
+        <script src="../app/bower_components/platform/platform.js"></script>
+
+    
+    </head>
+    <body><polymer-element name="polymer-body" extends="body" assetpath="../app/bower_components/polymer/">
+
+  <script>
+
+  // upgrade polymer-body last so that it can contain other imported elements
+  document.addEventListener('polymer-ready', function() {
+    
+    Polymer('polymer-body', Platform.mixin({
+
+      created: function() {
+        this.template = document.createElement('template');
+        var body = wrap(document).body;
+        var c$ = body.childNodes.array();
+        for (var i=0, c; (c=c$[i]); i++) {
+          if (c.localName !== 'script') {
+            this.template.content.appendChild(c);
+          }
+        }
+        // snarf up user defined model
+        window.model = this;
+      },
+
+      parseDeclaration: function(elementElement) {
+        this.lightFromTemplate(this.template);
+      }
+
+    }, window.model));
+
+  });
+
+  </script>
+
+</polymer-element>
+<!--
+ Copyright 2013 The Polymer Authors. All rights reserved.
+ Use of this source code is governed by a BSD-style
+ license that can be found in the LICENSE file.
+-->
+<script src="../app/bower_components/polymer/polymer.js"></script>
+<!-- <link rel="import" href="../polymer-dev/polymer.html"> -->
+
+<!--
+Copyright 2013 The Polymer Authors. All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+-->
+<!--
+/**
+ * @module Polymer Elements
+ */
+/**
+ * polymer-jsonp can be used to perform JSONP requests.
+ 
+ * Example:
+ *
+ *     <polymer-jsonp url="https://clients1.google.com/finance/info?q=GOOG&client=ig&callback="
+ *         response="{{data}}"></polymer-jsonp>
+ *
+ * @class polymer-jsonp
+ */
+/**
+ * Fired when a response is received.
+ *
+ * @event polymer-response
+ */
+-->
+
+
+<polymer-element name="polymer-jsonp" attributes="url response auto bustCache" assetpath="../app/bower_components/polymer-jsonp/">
+  <script>
+    (function() {
+      Polymer('polymer-jsonp', {
+        /**
+         * The URL target of the request.
+         * 
+         * @attribute url
+         * @type string
+         * @default ''
+         */
+        url: '',
+        /**
+         * Returns the response object.
+         *
+         * @attribute response
+         * @type Object
+         * @default null
+         */
+        response: null,
+        bustCache: false,
+        auto: false,
+        urlChanged: function() {
+          if (this.url && this.auto) {
+            this.go();
+          }
+        },
+        /**
+         * Performs a JSONP request to the url specified.
+         *
+         * @method go
+         */
+        go: function() {
+          if (!this.isInFlight()) {
+            this.callbackFunc = JSONP_CALLBACK_FUNC_NAME + callbackId++;
+            window[this.callbackFunc] = this.respond.bind(this);
+            var url = this.url + this.callbackFunc + (this.bustCache ? '&' + Math.random() : '');
+            this.addScript(url);
+          }
+        },
+        isInFlight: function() {
+          return !!this.script;
+        },
+        addScript: function(inSrc) {
+          this.script = document.createElement('script');
+          this.script.src = inSrc;
+          this.script.onerror = this.respond.bind(this);
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(this.script, s);
+        },
+        removeScript: function() {
+          if (this.script.parentNode) {
+            this.script.parentNode.removeChild(this.script);
+          }
+          this.script = null;
+        },
+        respond: function(inResponse) {
+          this.response = inResponse;
+          this.removeScript();
+          delete window[this.callbackFunc];
+          this.fire('polymer-response', {response: inResponse});
+        }
+      });
+      var JSONP_CALLBACK_FUNC_NAME = '_polymer_jsonp_callback_';
+      var callbackId = 0;
+    })();
+  </script>
+</polymer-element>
+
+
+
+<polymer-element name="display-rss" constructor="DisplayRssElement" attributes="url entries refresh" assetpath="../app/elements/">
+  <template>
+    <style>
+      /* styles for the custom element itself - lowest specificity */
+      :host { display: block; }
+      /* 
+      style if an ancestor has the different class
+      :host(.different) { } 
+      */
+    </style>
+    <polymer-jsonp id="feed_data" url="http://ajax.googleapis.com/ajax/services/feed/load?v=1.0&amp;num={{entries}}&amp;q={{url}}&amp;callback=" auto="true" response="{{data}}" on-polymer-response="{{responseHandler}}"></polymer-jsonp>
+    
+    <div class="container">
+        <h1 class="feed_title">{{feed.title}}</h1>
+        <small>Last updated: {{lastUpdated}}</small>
+        <ul class="entries">
+        <template repeat="{{entry in feed.entries}}">
+            <li>
+                <a href="{{entry.link}}" target="_blank" class="entry_title">{{entry.title}}</a>
+                <small class="entry_published">{{entry.publishedDate}}</small>
+                <p>{{entry.content}}</p>
+            </li>
+        </template>
+        </ul>
+    </div>
+  </template>
+  <script>
+    Polymer('display-rss', {
+      //applyAuthorStyles: true,
+      //resetStyleInheritance: true,
+      url: 'http://feeds.bbci.co.uk/news/england/rss.xml',
+      entries: 10,
+      refresh: 0,
+      lastUpdated: 'Not updated yet',
+      
+      ready: function() {
+          var that = this;
+          if (this.refresh) {
+              setInterval(function(){
+                  that.$.feed_data.go();
+              }, this.refresh);
+          }
+      },
+              
+      responseHandler: function() {
+        if (this.data.responseStatus === 200) {
+            this.lastUpdated = new Date();
+            this.feed = this.data.responseData.feed;
+        }
+      }     
+      
+    });
+  </script>
+</polymer-element>
+
+        
+        <div class="container">
+            <div class="header">
+                <h3 class="text-muted">display-rss</h3>
+            </div>
+
+            <div class="row marketing">
+                <div class="col-lg-12">
+                    <h4>The Component</h4>
+                    <p>
+                        <display-rss></display-rss>
+                    </p>
+
+                    <h4>Bootstrap</h4>
+                    <p>Sleek, intuitive, and powerful mobile first front-end framework for faster and easier web development.</p>
+
+                    <h4>Platform.js</h4>
+                    <p>Web Component polyfills for Custom Elements, HTML Imports, Templates and ShadowDOM.</p>
+
+                    <h4>Polymer</h4>
+                    <p>A new type of library for the web, built on top of Web Components, and designed to leverage the evolving web platform on modern browsers.</p>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>by <a href="http://github.com/beldar">beldar</a></p>
+            </div>
+
+        </div>
+        
+
+      <script>
+        document.addEventListener('WebComponentsReady', function() {
+            // Perform some behaviour
+        });
+      </script>
+    </body>
+</html>
