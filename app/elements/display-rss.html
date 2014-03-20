@@ -24,7 +24,7 @@
             <li>
                 <a href="{{entry.link}}" target="_blank" class="entry_title">{{entry.title}}</a>
                 <small class="entry_published">{{entry.publishedDate}}</small>
-                <p>{{entry.content}}</p>
+                <p>{{entry.contentSnippet}}</p>
             </li>
         </template>
         </ul>
@@ -50,7 +50,7 @@
               
       responseHandler: function() {
         if (this.data.responseStatus === 200) {
-            this.lastUpdated = new Date();
+            this.lastUpdated = new Date()
             this.feed = this.data.responseData.feed;
         }
       }     
