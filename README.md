@@ -69,7 +69,7 @@ And finally place the element where you want it using the attributes that you ne
 
     <display-rss></display-rss>
 
-You can also define a longitude and latitude:
+You can also define a url, number of entries or refresh time:
 
     <display-rss url="http://rss.news.yahoo.com/rss/topstories" entries="20" refresh="10000"></display-rss>
     
