@@ -62,9 +62,7 @@ There's an example/demo on the index.html of this project, but basically, you fi
 Then, just below import the html of the element:
 
     <link rel="import" href="elements/display-rss.html">
-
-Please note that this component expects the component `current-location.html` included in this repository on the same folder.
-    
+  
 And finally place the element where you want it using the attributes that you need:
 
     <display-rss></display-rss>
