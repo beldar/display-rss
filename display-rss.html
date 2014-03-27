@@ -1,0 +1,60 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/polymer-jsonp/polymer-jsonp.html">
+<polymer-element name="display-rss"  constructor="DisplayRssElement" attributes="url entries refresh">
+  <template>
+    <style>
+      /* styles for the custom element itself - lowest specificity */
+      :host { display: block; }
+      /* 
+      style if an ancestor has the different class
+      :host(.different) { } 
+      */
+    </style>
+    <polymer-jsonp  id="feed_data"
+                    url="http://ajax.googleapis.com/ajax/services/feed/load?v=1.0&num={{entries}}&q={{url}}&callback="
+                    auto="true"
+                    response="{{data}}"
+                    on-polymer-response="{{responseHandler}}"></polymer-jsonp>
+    
+    <div class="container">
+        <h1 class="feed_title">{{feed.title}}</h1>
+        <small>Last updated: {{lastUpdated}}</small>
+        <ul class="entries">
+        <template repeat="{{entry in feed.entries}}">
+            <li>
+                <a href="{{entry.link}}" target="_blank" class="entry_title">{{entry.title}}</a>
+                <small class="entry_published">{{entry.publishedDate}}</small>
+                <p>{{entry.contentSnippet}}</p>
+            </li>
+        </template>
+        </ul>
+    </div>
+  </template>
+  <script>
+    Polymer('display-rss', {
+      //applyAuthorStyles: true,
+      //resetStyleInheritance: true,
+      url: 'http://feeds.bbci.co.uk/news/england/rss.xml',
+      entries: 10,
+      refresh: 0,
+      lastUpdated: 'Not updated yet',
+      
+      ready: function() {
+          var that = this;
+          if (this.refresh) {
+              setInterval(function(){
+                  that.$.feed_data.go();
+              }, this.refresh);
+          }
+      },
+              
+      responseHandler: function() {
+        if (this.data.responseStatus === 200) {
+            this.lastUpdated = new Date()
+            this.feed = this.data.responseData.feed;
+        }
+      }     
+      
+    });
+  </script>
+</polymer-element>
