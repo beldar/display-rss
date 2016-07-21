@@ -55,22 +55,24 @@ That will leave everything ready on the `/dist` folder
 
 # How to use
 
-There's an example/demo on the index.html of this project, but basically, you first need to include the platform.js:
+There's an example/demo on the index.html of this project, but basically, you first need to import the html of the element:
 
-    <script src="bower_components/platform/platform.js"></script>
-    
-Then, just below import the html of the element:
+```html
+    <link rel="import" href="../bower_components/display-rss/display-rss.html">
+```
 
-    <link rel="import" href="elements/display-rss.html">
-  
-And finally place the element where you want it using the attributes that you need:
+And then just place the element where you want it using the attributes that you need:
 
+```html
     <display-rss></display-rss>
+```
 
 You can also define a url, number of entries or refresh time:
 
+```html
     <display-rss url="http://rss.news.yahoo.com/rss/topstories" entries="20" refresh="10000"></display-rss>
-    
+```
+
 Attributes summary
 -----------
 
